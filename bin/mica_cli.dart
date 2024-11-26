@@ -1,18 +1,18 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'generators/datasource_generator.dart';
-import 'generators/json_parse_model.dart';
-import 'generators/entity_generator.dart';
-import 'generators/model_generator.dart';
-import 'generators/pages_generator.dart';
-import 'generators/repository_generator.dart';
-import 'generators/repository_impl_generator.dart';
-import 'generators/usecase_generator.dart';
+import 'package:mica_cli/generators/datasource_generator.dart';
+import 'package:mica_cli/generators/json_parse_model.dart';
+import 'package:mica_cli/generators/entity_generator.dart';
+import 'package:mica_cli/generators/model_generator.dart';
+import 'package:mica_cli/generators/pages_generator.dart';
+import 'package:mica_cli/generators/repository_generator.dart';
+import 'package:mica_cli/generators/repository_impl_generator.dart';
+import 'package:mica_cli/generators/usecase_generator.dart';
 import 'package:path/path.dart';
 import 'package:args/args.dart';
 
-void main(List<String> args) {
+Future<void> main(List<String> args) async{
   final parser = ArgParser()
     ..addOption(
       'json_path',
@@ -118,37 +118,37 @@ void main(List<String> args) {
   final page = PagesGenerator(model.featureName);
 
   if (isGenerateAll) {
-    entity.generate(model);
-    modelGen.generate(model);
-    usecase.generate(model);
-    repo.generate(model);
-    repoImpl.generate(model);
-    datasources.generate(model);
-    page.generate(model);
+     entity.generate(model);
+     modelGen.generate(model);
+     usecase.generate(model);
+     repo.generate(model);
+     repoImpl.generate(model);
+    await datasources.generate(model);
+     page.generate(model);
   } else {
     if (isGenerateEntity) {
-      entity.generate(model);
+       entity.generate(model);
     }
 
     if (isGenerateModel) {
-      modelGen.generate(model);
+       modelGen.generate(model);
     }
 
     if (isGenerateRepository) {
-      repo.generate(model);
-      repoImpl.generate(model);
+       repo.generate(model);
+       repoImpl.generate(model);
     }
 
     if (isGenerateUseCase) {
-      usecase.generate(model);
+       usecase.generate(model);
     }
 
     if (isGenerateDataSource) {
-      datasources.generate(model);
+      await datasources.generate(model);
     }
 
     if (isGeneratePage) {
-      page.generate(model);
+       page.generate(model);
     }
   }
 }

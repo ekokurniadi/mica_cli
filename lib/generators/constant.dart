@@ -1,0 +1,1 @@
+const String remoteUrl = "https://raw.githubusercontent.com/ekokurniadi/mica_cli/master/lib/templates";

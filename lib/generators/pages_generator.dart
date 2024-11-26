@@ -4,6 +4,8 @@ import 'json_parse_model.dart';
 import 'package:mustache_template/mustache.dart';
 import 'package:path/path.dart' as path;
 import 'package:recase/recase.dart';
+import 'package:http/http.dart' as http;
+import 'package:mica_cli/generators/constant.dart';
 
 class PagesGenerator {
   final String featureName;
@@ -11,21 +13,16 @@ class PagesGenerator {
   const PagesGenerator(this.featureName);
 
   void generate(JsonParseModel parser) {
-     final scriptDir = path.dirname(Platform.script.toFilePath());
-     final templatePath = path.join(
-      scriptDir,
-      'templates',
-      'pages_template.mustache',
-    );
-    String content = File(templatePath).readAsStringSync();
+    String url = remoteUrl+"/pages_template.mustache";
+    final response = await http.get(Uri.parse(url));
     final template = Template(
-      content,
+      response.body,
       lenient: true,
       htmlEscapeValues: false,
     );
 
     final generateCode = template.renderString(
-      {'feature_name':parser.featureName.titleCase},
+      {'feature_name': parser.featureName.titleCase.replaceAll(' ','')},
     );
 
     final dir = Directory.current;

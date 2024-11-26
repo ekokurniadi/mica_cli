@@ -4,6 +4,8 @@ import 'json_parse_model.dart';
 import 'package:mustache_template/mustache.dart';
 import 'package:path/path.dart' as path;
 import 'package:recase/recase.dart';
+import 'package:http/http.dart' as http;
+import 'package:mica_cli/generators/constant.dart';
 
 class RepositoryGenerator {
   final String featureName;
@@ -11,25 +13,21 @@ class RepositoryGenerator {
   const RepositoryGenerator(this.featureName);
 
   void generate(JsonParseModel parser) {
-     final scriptDir = path.dirname(Platform.script.toFilePath());
-    final templatePath = path.join(
-      scriptDir,
-      'templates',
-      'repository_template.mustache',
-    );
-    String content = File(templatePath).readAsStringSync();
+    String url = remoteUrl+"/repository_template.mustache";
+    final response = await http.get(Uri.parse(url));
     final template = Template(
-      content,
+      response.body,
       lenient: true,
       htmlEscapeValues: false,
     );
+
 
     final map = {
       'flutter_package_name': parser.flutterPackageName,
       'generated_path': parser.generatedPath,
       'feature_name': parser.featureName,
       'entity_name': parser.entity.name.snakeCase,
-      'class_name': parser.featureName.titleCase,
+      'class_name': parser.featureName.titleCase.replaceAll(' ',''),
       'usecases': List.from(
         parser.usecases!.map(
           (e) => e.toJson(),
