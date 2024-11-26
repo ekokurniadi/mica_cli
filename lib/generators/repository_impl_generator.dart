@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:mica_cli/generators/json_parse_model.dart';
 import 'package:mustache_template/mustache.dart';
-import 'package:path/path.dart';
+import 'package:path/path.dart' as path;
 import 'package:recase/recase.dart';
 
 class RepositoryImplGenerator {
@@ -11,7 +11,9 @@ class RepositoryImplGenerator {
   const RepositoryImplGenerator(this.featureName);
 
   void generate(JsonParseModel parser) {
-    final templatePath = join(
+     final scriptDir = path.dirname(Platform.script.toFilePath());
+    final templatePath = path.join(
+      scriptDir,
       'lib',
       'templates',
       'repository_impl_template.mustache',
@@ -51,7 +53,7 @@ class RepositoryImplGenerator {
     );
 
     final dir = Directory.current;
-    final write = File(join(dir.path, featureName, 'data', 'repository'));
+    final write = File(path.join(dir.path, featureName, 'data', 'repository'));
     final output = Directory(write.path);
     if (!output.existsSync()) {
       output.createSync(recursive: true);
