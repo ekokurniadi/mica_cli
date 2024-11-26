@@ -1,0 +1,16 @@
+import 'package:dartz/dartz.dart';
+import 'package:{{flutter_package_name}}/core/errors/failures.dart';
+import 'package:{{flutter_package_name}}/core/usecases/usecase.dart';
+import 'package:{{flutter_package_name}}/{{generated_path}}/{{feature_name}}/data/models/{{entity_name}}_model.codegen.dart';
+import 'package:{{flutter_package_name}}/{{generated_path}}/{{feature_name}}/domain/repository/{{feature_name}}_repository.dart';
+import 'package:injectable/injectable.dart';
+
+@injectable
+class {{usecase.name}}UseCase implements UseCase<{{usecase.return_type}}, {{usecase.param}}>{
+  const {{usecase.name}}UseCase(this._repository);
+  final {{repository_name}}Repository _repository;
+  @override
+  Future<Either<Failures, {{usecase.return_type}}>> call({{usecase.param}} {{usecase.param_name}}) async{
+    return await _repository.{{usecase.method_name}}({{usecase.param_name}});
+  }
+}

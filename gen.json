@@ -1,0 +1,35 @@
+{
+    "flutter_package_name": "flutter_pos",
+    "feature_name": "user_management",
+    "generated_path":"modules/ronpos/features",
+    "entity": {
+        "name": "UserManagement",
+        "properties": [
+            {
+                "name": "id",
+                "type": "int",
+                "is_required": false
+            },
+            {
+                "name": "name",
+                "type": "String",
+                "is_required": true
+            }
+        ]
+    },
+    "usecases": [
+        {
+            "name": "GetUserById",
+            "return_type": "UserManagementModel",
+            "param": "int",
+            "param_name": "id"
+        },
+        {
+            "name": "GetAllUsers",
+            "return_type": "List<UserManagementModel>",
+            "param": "NoParams",
+            "param_name": "noParams"
+        }
+    ],
+    "datasources":["remote","local"]
+}

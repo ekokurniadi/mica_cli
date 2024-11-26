@@ -1,0 +1,9 @@
+import 'package:dartz/dartz.dart';
+import 'package:{{flutter_package_name}}/core/errors/failures.dart';
+import 'package:{{flutter_package_name}}/{{generated_path}}/{{feature_name}}/data/models/{{entity_name}}_model.codegen.dart';
+
+abstract class {{class_name}}Repository {
+  {{#usecases}}
+  Future<Either<Failures, {{return_type}}>> {{method_name}}({{param}} {{param_name}});
+  {{/usecases}}
+}

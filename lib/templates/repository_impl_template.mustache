@@ -1,0 +1,29 @@
+import 'package:dartz/dartz.dart';
+import 'package:{{flutter_package_name}}/core/errors/failures.dart';
+{{#datasources}}
+import 'package:{{flutter_package_name}}/{{generated_path}}/{{feature_name}}/data/datasources/{{source}}/{{datasource_file_name}}_datasource.dart';
+{{/datasources}}
+import 'package:{{flutter_package_name}}/{{generated_path}}/{{feature_name}}/data/models/{{entity_name}}_model.codegen.dart';
+import 'package:{{flutter_package_name}}/{{generated_path}}/{{feature_name}}/domain/repository/{{feature_name}}_repository.dart';
+import 'package:injectable/injectable.dart';
+
+@LazySingleton(as: {{class_name}}Repository)
+class {{class_name}}RepositoryImpl implements {{class_name}}Repository {
+  const {{class_name}}RepositoryImpl(
+  {{#datasources}}
+  this._{{datasource_field_name}}DataSource,
+  {{/datasources}}
+  );
+  
+  {{#datasources}}
+  final {{datasource_class_name}}DataSource _{{datasource_field_name}}DataSource;
+  {{/datasources}}
+
+ {{#usecases}}
+  @override
+  Future<Either<Failures, {{return_type}}>> {{method_name}}({{param}} {{param_name}}) async {
+    //TODO: implements {{method_name}}
+    throw UnimplementedError();
+  }
+  {{/usecases}}
+}

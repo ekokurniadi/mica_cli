@@ -1,0 +1,24 @@
+import 'package:dartz/dartz.dart';
+import 'package:{{flutter_package_name}}/core/errors/failures.dart';
+import 'package:{{flutter_package_name}}/{{generated_path}}/{{feature_name}}/data/models/{{entity_name}}_model.codegen.dart';
+import 'package:injectable/injectable.dart';
+
+abstract class {{class_name}}DataSource {
+  {{#usecases}}
+  Future<Either<Failures, {{return_type}}>> {{method_name}}({{param}} {{param_name}});
+  {{/usecases}}
+}
+
+@LazySingleton(as: {{class_name}}DataSource)
+class {{class_name}}DataSourceImpl implements {{class_name}}DataSource {
+  const {{class_name}}DataSourceImpl();
+
+  {{#usecases}}
+  @override
+  Future<Either<Failures, {{return_type}}>> {{method_name}}({{param}} {{param_name}}) async {
+    //TODO: implements {{method_name}}
+    throw UnimplementedError();
+  }
+  {{/usecases}}
+
+}
