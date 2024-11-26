@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:mica_cli/generators/json_parse_model.dart';
+import 'json_parse_model.dart';
 import 'package:mustache_template/mustache.dart';
 import 'package:path/path.dart' as path;
 import 'package:recase/recase.dart';
@@ -14,7 +14,6 @@ class RepositoryImplGenerator {
      final scriptDir = path.dirname(Platform.script.toFilePath());
     final templatePath = path.join(
       scriptDir,
-      'lib',
       'templates',
       'repository_impl_template.mustache',
     );

@@ -1,22 +1,21 @@
 import 'dart:io';
 
-import 'package:mica_cli/generators/json_parse_model.dart';
+import 'json_parse_model.dart';
 import 'package:mustache_template/mustache.dart';
 import 'package:path/path.dart' as path;
 import 'package:recase/recase.dart';
 
-class PagesGenerator {
+class EntityGenerator {
   final String featureName;
 
-  const PagesGenerator(this.featureName);
+  const EntityGenerator(this.featureName);
 
   void generate(JsonParseModel parser) {
-     final scriptDir = path.dirname(Platform.script.toFilePath());
-     final templatePath = path.join(
+    final scriptDir = path.dirname(Platform.script.toFilePath());
+    final templatePath = path.join(
       scriptDir,
-      'lib',
       'templates',
-      'pages_template.mustache',
+      'entity_template.mustache',
     );
     String content = File(templatePath).readAsStringSync();
     final template = Template(
@@ -26,18 +25,18 @@ class PagesGenerator {
     );
 
     final generateCode = template.renderString(
-      {'feature_name':parser.featureName.titleCase},
+      parser.toJson(),
     );
 
     final dir = Directory.current;
-    final write = File(path.join(dir.path, featureName, 'presentations', 'pages'));
+    final write = File(path.join(dir.path, featureName, 'domain', 'entities'));
     final output = Directory(write.path);
     if (!output.existsSync()) {
       output.createSync(recursive: true);
     }
 
     final outputFile = File(
-        '${output.path}/${parser.featureName.snakeCase}_page.dart');
+        '${output.path}/${parser.entity.name.snakeCase}_entity.codegen.dart');
 
     outputFile.writeAsString(generateCode);
     print('${outputFile.path} generated');
