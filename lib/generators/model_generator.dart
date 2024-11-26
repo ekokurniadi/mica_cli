@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:mica_cli/helpers/format_helper.dart';
+
 import 'json_parse_model.dart';
 import 'package:mustache_template/mustache.dart';
 import 'package:path/path.dart' as path;
@@ -11,8 +13,8 @@ class ModelGenerator {
   final String featureName;
   const ModelGenerator(this.featureName);
 
-  Future<void> generate(JsonParseModel parser) async{
-    String url = remoteUrl+"/models_template.mustache";
+  Future<void> generate(JsonParseModel parser) async {
+    String url = "$remoteUrl/models_template.mustache";
     final response = await http.get(Uri.parse(url));
     final template = Template(
       response.body,
@@ -25,7 +27,16 @@ class ModelGenerator {
     );
 
     final dir = Directory.current;
-    final write = File(path.join(dir.path, featureName, 'data', 'models'));
+    final write = File(
+      path.join(
+        dir.path,
+        'lib',
+        parser.generatedPath,
+        featureName,
+        'data',
+        'models',
+      ),
+    );
     final output = Directory(write.path);
     if (!output.existsSync()) {
       output.createSync(recursive: true);
@@ -35,6 +46,7 @@ class ModelGenerator {
         '${output.path}/${parser.entity.name.snakeCase}_model.codegen.dart');
 
     outputFile.writeAsString(generateCode);
+    await formatFile(outputFile.path);
     print('${outputFile.path} generated');
   }
 }

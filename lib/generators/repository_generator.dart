@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:mica_cli/helpers/format_helper.dart';
+
 import 'json_parse_model.dart';
 import 'package:mustache_template/mustache.dart';
 import 'package:path/path.dart' as path;
@@ -12,8 +14,8 @@ class RepositoryGenerator {
 
   const RepositoryGenerator(this.featureName);
 
-  Future<void> generate(JsonParseModel parser) async{
-    String url = remoteUrl+"/repository_template.mustache";
+  Future<void> generate(JsonParseModel parser) async {
+    String url = "$remoteUrl/repository_template.mustache";
     final response = await http.get(Uri.parse(url));
     final template = Template(
       response.body,
@@ -21,13 +23,12 @@ class RepositoryGenerator {
       htmlEscapeValues: false,
     );
 
-
     final map = {
       'flutter_package_name': parser.flutterPackageName,
       'generated_path': parser.generatedPath,
       'feature_name': parser.featureName,
       'entity_name': parser.entity.name.snakeCase,
-      'class_name': parser.featureName.titleCase.replaceAll(' ',''),
+      'class_name': parser.featureName.titleCase.replaceAll(' ', ''),
       'usecases': List.from(
         parser.usecases!.map(
           (e) => e.toJson(),
@@ -40,7 +41,16 @@ class RepositoryGenerator {
     );
 
     final dir = Directory.current;
-    final write = File(path.join(dir.path, featureName, 'domain', 'repository'));
+    final write = File(
+      path.join(
+        dir.path,
+        'lib',
+        parser.generatedPath,
+        featureName,
+        'domain',
+        'repository',
+      ),
+    );
     final output = Directory(write.path);
     if (!output.existsSync()) {
       output.createSync(recursive: true);
@@ -50,6 +60,7 @@ class RepositoryGenerator {
         File('${output.path}/${featureName.snakeCase}_repository.dart');
 
     outputFile.writeAsString(generateCode);
+    await formatFile(outputFile.path);
     print('${outputFile.path} generated');
   }
 }

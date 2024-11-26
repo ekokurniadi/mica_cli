@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:mica_cli/helpers/format_helper.dart';
+
 import 'json_parse_model.dart';
 import 'package:mustache_template/mustache.dart';
 import 'package:path/path.dart' as path;
@@ -12,8 +14,8 @@ class PagesGenerator {
 
   const PagesGenerator(this.featureName);
 
-  Future<void> generate(JsonParseModel parser) async{
-    String url = remoteUrl+"/pages_template.mustache";
+  Future<void> generate(JsonParseModel parser) async {
+    String url = "$remoteUrl/pages_template.mustache";
     final response = await http.get(Uri.parse(url));
     final template = Template(
       response.body,
@@ -22,20 +24,30 @@ class PagesGenerator {
     );
 
     final generateCode = template.renderString(
-      {'feature_name': parser.featureName.titleCase.replaceAll(' ','')},
+      {'feature_name': parser.featureName.titleCase.replaceAll(' ', '')},
     );
 
     final dir = Directory.current;
-    final write = File(path.join(dir.path, featureName, 'presentations', 'pages'));
+    final write = File(
+      path.join(
+        dir.path,
+        'lib',
+        parser.generatedPath,
+        featureName,
+        'presentations',
+        'pages',
+      ),
+    );
     final output = Directory(write.path);
     if (!output.existsSync()) {
       output.createSync(recursive: true);
     }
 
-    final outputFile = File(
-        '${output.path}/${parser.featureName.snakeCase}_page.dart');
+    final outputFile =
+        File('${output.path}/${parser.featureName.snakeCase}_page.dart');
 
     outputFile.writeAsString(generateCode);
+    await formatFile(outputFile.path);
     print('${outputFile.path} generated');
   }
 }
