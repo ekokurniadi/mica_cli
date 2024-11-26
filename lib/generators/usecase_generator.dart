@@ -12,7 +12,7 @@ class UsecaseGenerator {
 
   const UsecaseGenerator(this.featureName);
 
-  void generate(JsonParseModel parser) {
+  Future<void> generate(JsonParseModel parser) async{
     String url = remoteUrl+"/usecase_template.mustache";
     final response = await http.get(Uri.parse(url));
     final template = Template(

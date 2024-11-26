@@ -118,29 +118,29 @@ Future<void> main(List<String> args) async{
   final page = PagesGenerator(model.featureName);
 
   if (isGenerateAll) {
-     entity.generate(model);
-     modelGen.generate(model);
-     usecase.generate(model);
-     repo.generate(model);
-     repoImpl.generate(model);
+    await entity.generate(model);
+    await modelGen.generate(model);
+    await usecase.generate(model);
+    await repo.generate(model);
+    await repoImpl.generate(model);
     await datasources.generate(model);
-     page.generate(model);
+    await page.generate(model);
   } else {
     if (isGenerateEntity) {
-       entity.generate(model);
+      await entity.generate(model);
     }
 
     if (isGenerateModel) {
-       modelGen.generate(model);
+      await modelGen.generate(model);
     }
 
     if (isGenerateRepository) {
-       repo.generate(model);
-       repoImpl.generate(model);
+      await repo.generate(model);
+      await repoImpl.generate(model);
     }
 
     if (isGenerateUseCase) {
-       usecase.generate(model);
+      await usecase.generate(model);
     }
 
     if (isGenerateDataSource) {
@@ -148,7 +148,7 @@ Future<void> main(List<String> args) async{
     }
 
     if (isGeneratePage) {
-       page.generate(model);
+      await page.generate(model);
     }
   }
 }
