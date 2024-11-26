@@ -22,8 +22,11 @@ class ModelGenerator {
       htmlEscapeValues: false,
     );
 
+    final newMap = parser.toJson();
+    newMap['entity_name_snack_case'] = parser.entity.name.snakeCase;
+
     final generateCode = template.renderString(
-      parser.toJson(),
+      newMap,
     );
 
     final dir = Directory.current;

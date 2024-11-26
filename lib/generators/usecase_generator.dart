@@ -29,7 +29,7 @@ class UsecaseGenerator {
         'feature_name': parser.featureName,
         'entity_name': parser.entity.name.snakeCase,
         'usecase': usecase.toJson(),
-        'repository_name': parser.entity.name,
+        'repository_name': parser.featureName.titleCase.replaceAll(' ', ''),
         'generated_path': parser.generatedPath,
       };
       final generateCode = template.renderString(
