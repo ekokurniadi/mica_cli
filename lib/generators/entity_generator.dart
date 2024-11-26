@@ -11,9 +11,12 @@ class EntityGenerator {
   const EntityGenerator(this.featureName);
 
   void generate(JsonParseModel parser) {
-    String content = File(
-      'lib/templates/entity_template.mustache',
-    ).readAsStringSync();
+    final templatePath = join(
+      'lib',
+      'templates',
+      'entity_template.mustache',
+    );
+    String content = File(templatePath).readAsStringSync();
     final template = Template(
       content,
       lenient: true,

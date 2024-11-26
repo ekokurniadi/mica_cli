@@ -11,9 +11,12 @@ class DatasourceGenerator {
   const DatasourceGenerator(this.featureName);
 
   void generate(JsonParseModel parser) {
-    String content = File(
-      'lib/templates/datasource_template.mustache',
-    ).readAsStringSync();
+    final templatePath = join(
+      'lib',
+      'templates',
+      'datasource_template.mustache',
+    );
+    String content = File(templatePath).readAsStringSync();
     final template = Template(
       content,
       lenient: true,
@@ -26,7 +29,8 @@ class DatasourceGenerator {
         'generated_path': parser.generatedPath,
         'feature_name': parser.featureName,
         'entity_name': parser.entity.name.snakeCase,
-        'class_name': '${parser.featureName.titleCase}${sources.toString().titleCase}',
+        'class_name':
+            '${parser.featureName.titleCase}${sources.toString().titleCase}',
         'usecases': List.from(
           parser.usecases!.map(
             (e) => e.toJson(),
@@ -39,14 +43,15 @@ class DatasourceGenerator {
       );
 
       final dir = Directory.current;
-      final write = File(join(dir.path, featureName, 'data', 'datasources',sources));
+      final write =
+          File(join(dir.path, featureName, 'data', 'datasources', sources));
       final output = Directory(write.path);
       if (!output.existsSync()) {
         output.createSync(recursive: true);
       }
 
-      final outputFile =
-          File('${output.path}/${featureName.snakeCase}_${sources}_datasource.dart');
+      final outputFile = File(
+          '${output.path}/${featureName.snakeCase}_${sources}_datasource.dart');
 
       outputFile.writeAsString(generateCode);
       print('${outputFile.path} generated');

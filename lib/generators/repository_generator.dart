@@ -11,9 +11,12 @@ class RepositoryGenerator {
   const RepositoryGenerator(this.featureName);
 
   void generate(JsonParseModel parser) {
-    String content = File(
-      'lib/templates/repository_template.mustache',
-    ).readAsStringSync();
+    final templatePath = join(
+      'lib',
+      'templates',
+      'repository_template.mustache',
+    );
+    String content = File(templatePath).readAsStringSync();
     final template = Template(
       content,
       lenient: true,

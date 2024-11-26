@@ -11,9 +11,12 @@ class UsecaseGenerator {
   const UsecaseGenerator(this.featureName);
 
   void generate(JsonParseModel parser) {
-    String content = File(
-      'lib/templates/usecase_template.mustache',
-    ).readAsStringSync();
+    final templatePath = join(
+      'lib',
+      'templates',
+      'usecase_template.mustache',
+    );
+    String content = File(templatePath).readAsStringSync();
     final template = Template(
       content,
       lenient: true,
