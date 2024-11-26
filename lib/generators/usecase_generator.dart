@@ -28,7 +28,7 @@ class UsecaseGenerator {
         'entity_name': parser.entity.name.snakeCase,
         'usecase': usecase.toJson(),
         'repository_name': parser.entity.name,
-        'output_path': parser.generatedPath,
+        'generated_path': parser.generatedPath,
       };
       final generateCode = template.renderString(
         map,
