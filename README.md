@@ -41,3 +41,8 @@ dart pub global activate --source git https://github.com/ekokurniadi/mica_cli.gi
     "datasources":["local","remote"]                # Datasources
 }
 ```
+
+## Generate Feature
+```bash
+mica_cli 
+```
