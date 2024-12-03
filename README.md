@@ -42,7 +42,17 @@ dart pub global activate --source git https://github.com/ekokurniadi/mica_cli.gi
 }
 ```
 
-## Generate Feature
+## Using this cli
 ```bash
-mica_cli 
+mica_cli
+Usage: mica_cli [options]
+    --json_path      Path json file template
+-a, --all            Generate all
+-m, --model          Generate model
+-e, --entity         Generate entity
+-u, --usecase        Generate usecase
+-r, --repository     Generate repository
+-d, --datasources    Generate datasources
+-p, --page           Generate page
+-h, --help           Display help menu
 ```
