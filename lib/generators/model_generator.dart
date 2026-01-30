@@ -61,7 +61,7 @@ class ModelGenerator {
 
   String _getTransformExpression(Map<String, dynamic> property) {
     final name = property['name'] as String;
-    final isPrimitive = property['is_primitive'] as bool? ?? false;
+    final isPrimitive = property['is_primitive'] as bool? ?? true;
     final isList = property['is_list'] as bool? ?? false;
     final isRequired = property['is_required'] as bool? ?? true;
 
