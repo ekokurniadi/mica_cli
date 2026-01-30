@@ -81,8 +81,8 @@ class EntityPropertiesModel {
             ? "required ${json['type']}"
             : '${json['type']}?',
         isRequired: json['is_required'] == null ? true : false,
-        isList: json['is_list'] == null ? false : true,
-        isPrimitive: json['is_primitive'] == null ? false : true,
+        isList: json['is_list'],
+        isPrimitive: json['is_primitive'],
       );
 
   Map<String, dynamic> toJson() => {
