@@ -65,7 +65,7 @@ class EntityPropertiesModel {
     required this.type,
     this.isRequired = true,
     this.isList = false,
-    this.isPrimitive = false,
+    this.isPrimitive = true,
   });
 
   final String name;
@@ -82,7 +82,7 @@ class EntityPropertiesModel {
             : '${json['type']}?',
         isRequired: json['is_required'] ?? true,
         isList: json['is_list'] ?? false,
-        isPrimitive: json['is_primitive'] ?? false,
+        isPrimitive: json['is_primitive'] ?? true,
       );
 
   Map<String, dynamic> toJson() => {
