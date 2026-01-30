@@ -73,7 +73,7 @@ class ModelGenerator {
       'List<double>',
       'List<bool>',
     ].contains(property['type']);
-    final isList = name.startsWith('List<');
+    final isList = property['type'].startsWith('List<');
     final isRequired = property['is_required'] as bool? ?? true;
 
     if (isPrimitive) {
