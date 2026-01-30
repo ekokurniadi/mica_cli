@@ -15,11 +15,9 @@ class {{entity.name}}Model with _${{entity.name}}Model {
 }
 
 extension {{entity.name}}ModelX on {{entity.name}}Model {
-  {{entity.name}}Entity toEntity() {
-    return {{entity.name}}Entity(
+  {{entity.name}}Entity toEntity() => {{entity.name}}Entity(
       {{#entity.properties}}
       {{name}}: {{transform_expression}},
       {{/entity.properties}}
-    );
-  }
+  );
 }

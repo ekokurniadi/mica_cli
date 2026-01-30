@@ -12,11 +12,9 @@ class {{entity.name}}Entity with _${{entity.name}}Entity {
 }
 
 extension {{entity.name}}EntityX on {{entity.name}}Entity {
-  {{entity.name}}Model toModel() {
-    return {{entity.name}}Model(
+  {{entity.name}}Model toModel() => {{entity.name}}Model(
       {{#entity.properties}}
       {{name}}: {{transform_expression}},
       {{/entity.properties}}
-    );
-  }
+  );
 }
