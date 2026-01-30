@@ -14,12 +14,12 @@ class {{entity.name}}Model with _${{entity.name}}Model {
   factory {{entity.name}}Model.fromJson(Map<String, dynamic> json) => _${{entity.name}}ModelFromJson(json);
 }
 
-
 extension {{entity.name}}ModelX on {{entity.name}}Model {
-  {{entity.name}}Entity toEntity() {
+  {{entity.name}}Model toEntity() {
     return {{entity.name}}Entity(
       {{#entity.properties}}
-      {{name}}: {{#is_list}}
+      {{name}}:
+      {{#is_list}}
         {{#is_primitive}}
           {{name}}
         {{/is_primitive}}
