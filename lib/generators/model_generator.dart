@@ -25,9 +25,14 @@ class ModelGenerator {
     final newMap = parser.toJson();
     newMap['entity_name_snack_case'] = parser.entity.name.snakeCase;
 
-    final generateCode = template.renderString(
-      newMap,
-    );
+    if (newMap['entity'] != null && newMap['entity']['properties'] != null) {
+      final properties = newMap['entity']['properties'] as List;
+      for (var property in properties) {
+        property['transform_expression'] = _getTransformExpression(property);
+      }
+    }
+
+    final generateCode = template.renderString(newMap);
 
     final dir = Directory.current;
     final write = File(
@@ -46,10 +51,34 @@ class ModelGenerator {
     }
 
     final outputFile = File(
-        '${output.path}/${parser.entity.name.snakeCase}_model.codegen.dart');
+      '${output.path}/${parser.entity.name.snakeCase}_model.codegen.dart',
+    );
 
     outputFile.writeAsString(generateCode);
     await formatFile(outputFile.path);
     print('${outputFile.path} generated');
+  }
+
+  String _getTransformExpression(Map<String, dynamic> property) {
+    final name = property['name'] as String;
+    final isPrimitive = property['is_primitive'] as bool? ?? false;
+    final isList = property['is_list'] as bool? ?? false;
+    final isRequired = property['is_required'] as bool? ?? true;
+
+    if (isPrimitive) {
+      return name;
+    } else if (isList) {
+      if (isRequired) {
+        return '$name.map((e) => e.toEntity()).toList()';
+      } else {
+        return '$name?.map((e) => e.toEntity()).toList()';
+      }
+    } else {
+      if (isRequired) {
+        return '$name.toEntity()';
+      } else {
+        return '$name?.toEntity()';
+      }
+    }
   }
 }

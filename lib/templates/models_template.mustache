@@ -18,7 +18,7 @@ extension {{entity.name}}ModelX on {{entity.name}}Model {
   {{entity.name}}Entity toEntity() {
     return {{entity.name}}Entity(
       {{#entity.properties}}
-      {{name}}: {{#is_primitive}}{{name}}{{/is_primitive}}{{^is_primitive}}{{#is_list}}{{^is_required}}{{name}}?.map((e) => e.toEntity()).toList(){{/is_required}}{{#is_required}}{{name}}.map((e) => e.toEntity()).toList(){{/is_required}}{{/is_list}}{{^is_list}}{{^is_required}}{{name}}?.toEntity(){{/is_required}}{{#is_required}}{{name}}.toEntity(){{/is_required}}{{/is_list}}{{/is_primitive}},
+      {{name}}: {{transform_expression}},
       {{/entity.properties}}
     );
   }
