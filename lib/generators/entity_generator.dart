@@ -63,8 +63,8 @@ class EntityGenerator {
 
   String _getTransformExpression(Map<String, dynamic> property) {
     final name = property['name'] as String;
-    final isPrimitive = property['is_primitive'] as bool? ?? false;
-    final isList = property['is_list'] as bool? ?? false;
+    final isPrimitive = ['int','String','double','bool','num','DateTime','List<int>', 'List<String>','List<double>', 'List<bool>'].contains(property['type']);
+    final isList = name.startsWith('List<');
     final isRequired = property['is_required'] as bool? ?? true;
 
     if (isPrimitive) {
