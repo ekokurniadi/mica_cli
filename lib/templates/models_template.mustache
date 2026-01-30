@@ -13,3 +13,39 @@ class {{entity.name}}Model with _${{entity.name}}Model {
 
   factory {{entity.name}}Model.fromJson(Map<String, dynamic> json) => _${{entity.name}}ModelFromJson(json);
 }
+
+
+extension {{entity.name}}ModelX on {{entity.name}}Model {
+  {{entity.name}}Entity toEntity() {
+    return {{entity.name}}Entity(
+      {{#entity.properties}}
+      {{name}}: {{#is_list}}
+        {{#is_primitive}}
+          {{name}}
+        {{/is_primitive}}
+        {{^is_primitive}}
+          {{#is_required}}
+            {{name}}.map((e) => e.toEntity()).toList()
+          {{/is_required}}
+          {{^is_required}}
+            {{name}}?.map((e) => e.toEntity()).toList()
+          {{/is_required}}
+        {{/is_primitive}}
+      {{/is_list}}
+      {{^is_list}}
+        {{#is_primitive}}
+          {{name}}
+        {{/is_primitive}}
+        {{^is_primitive}}
+          {{#is_required}}
+            {{name}}.toEntity()
+          {{/is_required}}
+          {{^is_required}}
+            {{name}}?.toEntity()
+          {{/is_required}}
+        {{/is_primitive}}
+      {{/is_list}},
+      {{/entity.properties}}
+    );
+  }
+}
