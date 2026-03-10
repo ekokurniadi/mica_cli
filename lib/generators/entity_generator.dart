@@ -22,11 +22,11 @@ class EntityGenerator {
     final String templateBody = await _fetchTemplate();
 
     // Generate the root entity.
-    await _generateOne(parser.entity, parser, templateBody);
+    await _generateOne(parser.entity, parser, templateBody, isNested: false);
 
     // Recursively generate every nested entity (depth-first).
     for (final nested in parser.entity.allNestedEntities()) {
-      await _generateOne(nested, parser, templateBody);
+      await _generateOne(nested, parser, templateBody, isNested: true);
     }
   }
 
@@ -41,15 +41,18 @@ class EntityGenerator {
   Future<void> _generateOne(
     EntityParserModel entity,
     JsonParseModel parser,
-    String templateBody,
-  ) async {
+    String templateBody, {
+    bool isNested = false,
+  }) async {
     final dir = Directory.current;
+    final effectiveFeatureName =
+        isNested ? entity.name.snakeCase : featureName;
     final outputDir = Directory(
       path.join(
         dir.path,
         'lib',
         parser.generatedPath,
-        featureName,
+        effectiveFeatureName,
         'domain',
         'entities',
       ),
@@ -202,7 +205,7 @@ class EntityGenerator {
     String featureName,
     String typeName,
   ) {
-    return "import 'package:$packageName/$generatedPath/$featureName/"
+    return "import 'package:$packageName/$generatedPath/${typeName.snakeCase}/"
         "domain/entities/${typeName.snakeCase}_entity.codegen.dart';";
   }
 }

@@ -21,11 +21,11 @@ class ModelGenerator {
     final String templateBody = await _fetchTemplate();
 
     // Generate the root model.
-    await _generateOne(parser.entity, parser, templateBody);
+    await _generateOne(parser.entity, parser, templateBody, isNested: false);
 
     // Recursively generate every nested model.
     for (final nested in parser.entity.allNestedEntities()) {
-      await _generateOne(nested, parser, templateBody);
+      await _generateOne(nested, parser, templateBody, isNested: true);
     }
   }
 
@@ -40,15 +40,18 @@ class ModelGenerator {
   Future<void> _generateOne(
     EntityParserModel entity,
     JsonParseModel parser,
-    String templateBody,
-  ) async {
+    String templateBody, {
+    bool isNested = false,
+  }) async {
     final dir = Directory.current;
+    final effectiveFeatureName =
+        isNested ? entity.name.snakeCase : featureName;
     final outputDir = Directory(
       path.join(
         dir.path,
         'lib',
         parser.generatedPath,
-        featureName,
+        effectiveFeatureName,
         'data',
         'models',
       ),
@@ -199,7 +202,7 @@ class ModelGenerator {
     String featureName,
     String typeName,
   ) {
-    return "import 'package:$packageName/$generatedPath/$featureName/"
+    return "import 'package:$packageName/$generatedPath/${typeName.snakeCase}/"
         "data/models/${typeName.snakeCase}_model.codegen.dart';";
   }
 }
