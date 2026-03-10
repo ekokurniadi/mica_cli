@@ -86,7 +86,14 @@ class CodeMergeHelper {
     const marker = '}) = _';
     final idx = source.indexOf(marker);
     if (idx == -1) return source;
-    return source.substring(0, idx) + propertyDecl + source.substring(idx);
+
+    // Ensure the existing last parameter has a trailing comma before injection.
+    final before = source.substring(0, idx);
+    final trimmed = before.trimRight();
+    final needsComma = trimmed.isNotEmpty && !trimmed.endsWith(',');
+    final prefix = needsComma ? ',\n' : '';
+
+    return trimmed + prefix + propertyDecl + source.substring(idx);
   }
 
   /// Injects [mappingLine] (e.g. `    email: email,\n`) into the

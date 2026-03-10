@@ -12,11 +12,18 @@ import 'package:mica_cli/generators/constant.dart';
 
 class RepositoryImplGenerator {
   final String featureName;
+  final http.Client _client;
+  final Directory? _workingDir;
 
-  const RepositoryImplGenerator(this.featureName);
+  RepositoryImplGenerator(
+    this.featureName, {
+    http.Client? client,
+    Directory? workingDir,
+  })  : _client = client ?? http.Client(),
+        _workingDir = workingDir;
 
   Future<void> generate(JsonParseModel parser) async {
-    final dir = Directory.current;
+    final dir = _workingDir ?? Directory.current;
     final write = File(
       path.join(
         dir.path,
@@ -66,7 +73,7 @@ class RepositoryImplGenerator {
 
     // ── First-time generation ──────────────────────────────────────────────
     String url = "$remoteUrl/repository_impl_template.mustache";
-    final response = await http.get(Uri.parse(url));
+    final response = await _client.get(Uri.parse(url));
     final template = Template(
       response.body,
       lenient: true,

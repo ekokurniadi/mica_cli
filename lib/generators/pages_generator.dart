@@ -11,12 +11,19 @@ import 'package:mica_cli/generators/constant.dart';
 
 class PagesGenerator {
   final String featureName;
+  final http.Client _client;
+  final Directory? _workingDir;
 
-  const PagesGenerator(this.featureName);
+  PagesGenerator(
+    this.featureName, {
+    http.Client? client,
+    Directory? workingDir,
+  })  : _client = client ?? http.Client(),
+        _workingDir = workingDir;
 
   Future<void> generate(JsonParseModel parser) async {
     String url = "$remoteUrl/pages_template.mustache";
-    final response = await http.get(Uri.parse(url));
+    final response = await _client.get(Uri.parse(url));
     final template = Template(
       response.body,
       lenient: true,
@@ -27,7 +34,7 @@ class PagesGenerator {
       {'feature_name': parser.featureName.titleCase.replaceAll(' ', '')},
     );
 
-    final dir = Directory.current;
+    final dir = _workingDir ?? Directory.current;
     final write = File(
       path.join(
         dir.path,
@@ -46,7 +53,7 @@ class PagesGenerator {
     final outputFile =
         File('${output.path}/${parser.featureName.snakeCase}_page.dart');
 
-    outputFile.writeAsString(generateCode);
+    await outputFile.writeAsString(generateCode);
     await formatFile(outputFile.path);
     print('${outputFile.path} generated');
   }

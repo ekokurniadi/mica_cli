@@ -2,7 +2,10 @@ import 'dart:io';
 
 Future<void> formatFile(String filePath) async {
   try {
-    final result = await Process.run('dart', ['format', filePath]);
+    final result = await Process.run(
+      Platform.resolvedExecutable,
+      ['format', filePath],
+    );
 
     if (result.exitCode == 0) {
       print('Formatting successful: ${result.stdout}');

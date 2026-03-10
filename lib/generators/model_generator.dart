@@ -12,8 +12,15 @@ import 'package:mica_cli/generators/constant.dart';
 
 class ModelGenerator {
   final String featureName;
+  final http.Client _client;
+  final Directory? _workingDir;
 
-  const ModelGenerator(this.featureName);
+  ModelGenerator(
+    this.featureName, {
+    http.Client? client,
+    Directory? workingDir,
+  })  : _client = client ?? http.Client(),
+        _workingDir = workingDir;
 
   // ── Public entry point ──────────────────────────────────────────────────
 
@@ -33,7 +40,7 @@ class ModelGenerator {
 
   Future<String> _fetchTemplate() async {
     final url = '$remoteUrl/models_template.mustache';
-    final response = await http.get(Uri.parse(url));
+    final response = await _client.get(Uri.parse(url));
     return response.body;
   }
 
@@ -43,7 +50,7 @@ class ModelGenerator {
     String templateBody, {
     bool isNested = false,
   }) async {
-    final dir = Directory.current;
+    final dir = _workingDir ?? Directory.current;
     final effectiveFeatureName =
         isNested ? entity.name.snakeCase : featureName;
     final outputDir = Directory(

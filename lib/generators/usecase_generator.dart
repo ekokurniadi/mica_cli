@@ -11,12 +11,19 @@ import 'package:mica_cli/generators/constant.dart';
 
 class UsecaseGenerator {
   final String featureName;
+  final http.Client _client;
+  final Directory? _workingDir;
 
-  const UsecaseGenerator(this.featureName);
+  UsecaseGenerator(
+    this.featureName, {
+    http.Client? client,
+    Directory? workingDir,
+  })  : _client = client ?? http.Client(),
+        _workingDir = workingDir;
 
   Future<void> generate(JsonParseModel parser) async {
     String url = "$remoteUrl/usecase_template.mustache";
-    final response = await http.get(Uri.parse(url));
+    final response = await _client.get(Uri.parse(url));
     final template = Template(
       response.body,
       lenient: true,
@@ -24,7 +31,7 @@ class UsecaseGenerator {
     );
 
     for (final usecase in parser.usecases!) {
-      final dir = Directory.current;
+      final dir = _workingDir ?? Directory.current;
       final write = File(
         path.join(
           dir.path,
