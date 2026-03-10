@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:mica_cli/helpers/code_merge_helper.dart';
 import 'package:mica_cli/helpers/format_helper.dart';
 
 import 'json_parse_model.dart';
@@ -15,6 +16,55 @@ class RepositoryImplGenerator {
   const RepositoryImplGenerator(this.featureName);
 
   Future<void> generate(JsonParseModel parser) async {
+    final dir = Directory.current;
+    final write = File(
+      path.join(
+        dir.path,
+        'lib',
+        parser.generatedPath,
+        featureName,
+        'data',
+        'repository',
+      ),
+    );
+    final output = Directory(write.path);
+    if (!output.existsSync()) {
+      output.createSync(recursive: true);
+    }
+
+    final outputFile =
+        File('${output.path}/${featureName.snakeCase}_repository_impl.dart');
+
+    // ── Smart-append: file already exists ──────────────────────────────────
+    if (outputFile.existsSync()) {
+      final existingContent = outputFile.readAsStringSync();
+      final newUsecases = CodeMergeHelper.filterNewUsecases(
+        parser.usecases ?? [],
+        existingContent,
+      );
+
+      if (newUsecases.isEmpty) {
+        print('${outputFile.path} – up to date, nothing to add');
+        return;
+      }
+
+      // Build @override method stubs for each new usecase
+      final injection =
+          newUsecases.map(CodeMergeHelper.buildImplMethod).join();
+
+      final updatedContent =
+          CodeMergeHelper.injectBeforeLastBrace(existingContent, injection);
+
+      outputFile.writeAsStringSync(updatedContent);
+      await formatFile(outputFile.path);
+      print(
+        '${outputFile.path} – appended ${newUsecases.length} new method(s): '
+        '${newUsecases.map((e) => e.methodName).join(', ')}',
+      );
+      return;
+    }
+
+    // ── First-time generation ──────────────────────────────────────────────
     String url = "$remoteUrl/repository_impl_template.mustache";
     final response = await http.get(Uri.parse(url));
     final template = Template(
@@ -53,30 +103,8 @@ class RepositoryImplGenerator {
       ),
     };
 
-    final generateCode = template.renderString(
-      map,
-    );
-
-    final dir = Directory.current;
-    final write = File(
-      path.join(
-        dir.path,
-        'lib',
-        parser.generatedPath,
-        featureName,
-        'data',
-        'repository',
-      ),
-    );
-    final output = Directory(write.path);
-    if (!output.existsSync()) {
-      output.createSync(recursive: true);
-    }
-
-    final outputFile =
-        File('${output.path}/${featureName.snakeCase}_repository_impl.dart');
-
-    outputFile.writeAsString(generateCode);
+    final generateCode = template.renderString(map);
+    outputFile.writeAsStringSync(generateCode);
     await formatFile(outputFile.path);
     print('${outputFile.path} generated');
   }

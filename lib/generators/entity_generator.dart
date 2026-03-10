@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:mica_cli/helpers/code_merge_helper.dart';
 import 'package:mica_cli/helpers/format_helper.dart';
 
 import 'json_parse_model.dart';
@@ -14,30 +15,36 @@ class EntityGenerator {
 
   const EntityGenerator(this.featureName);
 
+  // ── Public entry point ──────────────────────────────────────────────────
+
   Future<void> generate(JsonParseModel parser) async {
-    String url = "$remoteUrl/entity_template.mustache";
-    final response = await http.get(Uri.parse(url));
-    final template = Template(
-      response.body,
-      lenient: true,
-      htmlEscapeValues: false,
-    );
+    // Fetch the template once; reuse for all entities in this run.
+    final String templateBody = await _fetchTemplate();
 
-    final newMap = parser.toJson();
-    newMap['entity_name_snack_case'] = parser.entity.name.snakeCase;
+    // Generate the root entity.
+    await _generateOne(parser.entity, parser, templateBody);
 
-    // Preprocess properties to add transform_expression
-    if (newMap['entity'] != null && newMap['entity']['properties'] != null) {
-      final properties = newMap['entity']['properties'] as List;
-      for (var property in properties) {
-        property['transform_expression'] = _getTransformExpression(property);
-      }
+    // Recursively generate every nested entity (depth-first).
+    for (final nested in parser.entity.allNestedEntities()) {
+      await _generateOne(nested, parser, templateBody);
     }
+  }
 
-    final generateCode = template.renderString(newMap);
+  // ── Private helpers ─────────────────────────────────────────────────────
 
+  Future<String> _fetchTemplate() async {
+    final url = '$remoteUrl/entity_template.mustache';
+    final response = await http.get(Uri.parse(url));
+    return response.body;
+  }
+
+  Future<void> _generateOne(
+    EntityParserModel entity,
+    JsonParseModel parser,
+    String templateBody,
+  ) async {
     final dir = Directory.current;
-    final write = File(
+    final outputDir = Directory(
       path.join(
         dir.path,
         'lib',
@@ -47,40 +54,155 @@ class EntityGenerator {
         'entities',
       ),
     );
-    final output = Directory(write.path);
-    if (!output.existsSync()) {
-      output.createSync(recursive: true);
+    if (!outputDir.existsSync()) {
+      outputDir.createSync(recursive: true);
     }
 
     final outputFile = File(
-      '${output.path}/${parser.entity.name.snakeCase}_entity.codegen.dart',
+      '${outputDir.path}/${entity.name.snakeCase}_entity.codegen.dart',
     );
 
-    outputFile.writeAsString(generateCode);
+    // ── Smart-append if file already exists ──────────────────────────────
+    if (outputFile.existsSync()) {
+      final existing = outputFile.readAsStringSync();
+
+      final newProps = CodeMergeHelper.filterNewProperties(
+        entity.properties,
+        existing,
+      );
+      if (newProps.isEmpty) {
+        print('${outputFile.path} – up to date, nothing to add');
+        return;
+      }
+
+      // Append new property imports (non-primitive types only).
+      var updated = existing;
+      for (final prop in newProps) {
+        if (prop.isPrimitive == false) {
+          final importLine = _entityImportLine(
+            parser.flutterPackageName,
+            parser.generatedPath,
+            featureName,
+            prop.rawType,
+          );
+          if (!updated.contains(importLine)) {
+            updated = CodeMergeHelper.injectImportLine(updated, importLine);
+          }
+        }
+      }
+
+      // Inject into the freezed factory constructor.
+      final factoryDecls = newProps
+          .map((p) => '    ${_entityDecoratedType(p)} ${p.name},\n')
+          .join();
+      updated =
+          CodeMergeHelper.injectIntoFreezedFactory(updated, factoryDecls);
+
+      // Inject into the toModel() extension.
+      final extensionLines = newProps
+          .map((p) => '      ${p.name}: ${_toModelExpression(p)},\n')
+          .join();
+      updated =
+          CodeMergeHelper.injectIntoExtensionCall(updated, extensionLines);
+
+      outputFile.writeAsStringSync(updated);
+      await formatFile(outputFile.path);
+      print(
+        '${outputFile.path} – appended ${newProps.length} new property(ies): '
+        '${newProps.map((p) => p.name).join(', ')}',
+      );
+      return;
+    }
+
+    // ── First-time generation ─────────────────────────────────────────────
+    final template = Template(
+      templateBody,
+      lenient: true,
+      htmlEscapeValues: false,
+    );
+
+    // Build the property list with Entity-suffixed types for non-primitives.
+    final properties = entity.properties.map((p) {
+      final map = p.toJson();
+      map['type'] = _entityDecoratedType(p);
+      map['transform_expression'] = _toModelExpression(p);
+      return map;
+    }).toList();
+
+    final map = {
+      'flutter_package_name': parser.flutterPackageName,
+      'generated_path': parser.generatedPath,
+      'feature_name': parser.featureName,
+      'entity_name_snack_case': entity.name.snakeCase,
+      'entity': {
+        'name': entity.name,
+        'properties': properties,
+      },
+    };
+
+    var generatedCode = template.renderString(map);
+
+    // Inject imports for non-primitive (nested) entity types.
+    for (final prop in entity.properties) {
+      if (prop.isPrimitive == false) {
+        final importLine = _entityImportLine(
+          parser.flutterPackageName,
+          parser.generatedPath,
+          featureName,
+          prop.rawType,
+        );
+        generatedCode =
+            CodeMergeHelper.injectImportLine(generatedCode, importLine);
+      }
+    }
+
+    outputFile.writeAsStringSync(generatedCode);
     await formatFile(outputFile.path);
     print('${outputFile.path} generated');
   }
 
-  String _getTransformExpression(Map<String, dynamic> property) {
-    final name = property['name'] as String;
-    final isPrimitive = property['is_primitive'] as bool? ?? true;
-    final isList = property['is_list'] as bool? ?? false;
-    final isRequired = property['is_required'] as bool? ?? true;
+  // ── Type helpers ─────────────────────────────────────────────────────────
 
-    if (isPrimitive) {
-      return name;
-    } else if (isList) {
-      if (isRequired) {
-        return '$name.map((e) => e.toModel()).toList()';
-      } else {
-        return '$name?.map((e) => e.toModel()).toList()';
-      }
-    } else {
-      if (isRequired) {
-        return '$name.toModel()';
-      } else {
-        return '$name?.toModel()';
-      }
+  /// Decorated type for use inside an entity class, e.g.
+  ///   `required AddressEntity`  /  `List<AddressEntity>?`  /  `required String`
+  String _entityDecoratedType(EntityPropertiesModel prop) {
+    if (prop.isPrimitive == true) return prop.type;
+
+    final suffix = 'Entity';
+    final typeName = '${prop.rawType}$suffix';
+    final isList = prop.isList == true;
+    final isRequired = prop.isRequired == true;
+
+    if (isList) {
+      return isRequired ? 'required List<$typeName>' : 'List<$typeName>?';
     }
+    return isRequired ? 'required $typeName' : '$typeName?';
+  }
+
+  /// Expression used inside `toModel()` for this property.
+  String _toModelExpression(EntityPropertiesModel prop) {
+    final name = prop.name;
+    if (prop.isPrimitive == true) return name;
+
+    final isList = prop.isList == true;
+    final isRequired = prop.isRequired == true;
+
+    if (isList) {
+      return isRequired
+          ? '$name.map((e) => e.toModel()).toList()'
+          : '$name?.map((e) => e.toModel()).toList()';
+    }
+    return isRequired ? '$name.toModel()' : '$name?.toModel()';
+  }
+
+  /// Import line for a nested entity type inside this feature.
+  String _entityImportLine(
+    String packageName,
+    String generatedPath,
+    String featureName,
+    String typeName,
+  ) {
+    return "import 'package:$packageName/$generatedPath/$featureName/"
+        "domain/entities/${typeName.snakeCase}_entity.codegen.dart';";
   }
 }

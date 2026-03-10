@@ -1,7 +1,7 @@
 {
     "flutter_package_name": "flutter_pos",
     "feature_name": "user_management",
-    "generated_path":"modules/ronpos/features",
+    "generated_path": "modules/ronpos/features",
     "entity": {
         "name": "UserManagement",
         "properties": [
@@ -14,6 +14,63 @@
                 "name": "name",
                 "type": "String",
                 "is_required": true
+            },
+            {
+                "name": "address",
+                "type": "Address",
+                "is_required": false,
+                "is_primitive": false,
+                "is_list": false,
+                "properties": [
+                    {
+                        "name": "street",
+                        "type": "String",
+                        "is_required": true
+                    },
+                    {
+                        "name": "city",
+                        "type": "String",
+                        "is_required": true
+                    },
+                    {
+                        "name": "location",
+                        "type": "GeoLocation",
+                        "is_required": false,
+                        "is_primitive": false,
+                        "is_list": false,
+                        "properties": [
+                            {
+                                "name": "lat",
+                                "type": "double",
+                                "is_required": true
+                            },
+                            {
+                                "name": "lng",
+                                "type": "double",
+                                "is_required": true
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "roles",
+                "type": "Role",
+                "is_required": true,
+                "is_primitive": false,
+                "is_list": true,
+                "properties": [
+                    {
+                        "name": "roleId",
+                        "type": "int",
+                        "is_required": true
+                    },
+                    {
+                        "name": "roleName",
+                        "type": "String",
+                        "is_required": true
+                    }
+                ]
             }
         ]
     },
@@ -31,5 +88,5 @@
             "param_name": "noParams"
         }
     ],
-    "datasources":["remote","local"]
+    "datasources": ["remote", "local"]
 }

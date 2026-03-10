@@ -24,18 +24,6 @@ class UsecaseGenerator {
     );
 
     for (final usecase in parser.usecases!) {
-      final map = {
-        'flutter_package_name': parser.flutterPackageName,
-        'feature_name': parser.featureName,
-        'entity_name': parser.entity.name.snakeCase,
-        'usecase': usecase.toJson(),
-        'repository_name': parser.featureName.titleCase.replaceAll(' ', ''),
-        'generated_path': parser.generatedPath,
-      };
-      final generateCode = template.renderString(
-        map,
-      );
-
       final dir = Directory.current;
       final write = File(
         path.join(
@@ -55,7 +43,26 @@ class UsecaseGenerator {
       final outputFile =
           File('${output.path}/${usecase.name.snakeCase}_usecase.dart');
 
-      outputFile.writeAsString(generateCode);
+      // ── Smart-append: skip if the usecase file already exists ─────────────
+      // Each usecase lives in its own file. If the file is already there the
+      // developer may have customised it, so we leave it untouched.
+      if (outputFile.existsSync()) {
+        print('${outputFile.path} – already exists, skipping');
+        continue;
+      }
+
+      // ── First-time generation ─────────────────────────────────────────────
+      final map = {
+        'flutter_package_name': parser.flutterPackageName,
+        'feature_name': parser.featureName,
+        'entity_name': parser.entity.name.snakeCase,
+        'usecase': usecase.toJson(),
+        'repository_name': parser.featureName.titleCase.replaceAll(' ', ''),
+        'generated_path': parser.generatedPath,
+      };
+      final generateCode = template.renderString(map);
+
+      outputFile.writeAsStringSync(generateCode);
       await formatFile(outputFile.path);
       print('${outputFile.path} generated');
     }
